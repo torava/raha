@@ -1,4 +1,5 @@
-import { Box, Button, MenuItem, Select, TextField } from '@mui/material';
+import Delete from '@mui/icons-material/Delete';
+import { Box, Button, IconButton, MenuItem, Select, TextField } from '@mui/material';
 import type { PieItemId, PieValueType } from '@mui/x-charts';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { useState } from 'react';
@@ -6,16 +7,16 @@ import { useState } from 'react';
 function App() {
   const [data, setData] = useState<(PieValueType & { period: string })[]>([]);
   const [childData, setChildData] = useState<(PieValueType & { parentId?: PieItemId; period: string })[]>([]);
-  const [previousPeriod, setPreviousPeriod] = useState('30');
-  const [currentPeriod, setCurrentPeriod] = useState('30');
+  const [previousPeriod, setPreviousPeriod] = useState('30.4167');
+  const [currentPeriod, setCurrentPeriod] = useState('30.4167');
   const middleRadius = 167;
   const fittedData = data.map((item) => ({
     ...item,
-    value: item.value / Number(item.period) * Number(currentPeriod),
+    value: (item.value / Number(item.period)) * Number(currentPeriod),
   }));
   const fittedChildData = childData.map((item) => ({
     ...item,
-    value: item.value / Number(item.period) * Number(currentPeriod),
+    value: (item.value / Number(item.period)) * Number(currentPeriod),
   }));
   return (
     <>
@@ -83,6 +84,15 @@ function App() {
                 }}
                 sx={{ m: 1 }}
               />
+              <IconButton
+                onClick={() => {
+                  const newData = [...data];
+                  newData.splice(index, 1);
+                  setData(newData);
+                }}
+              >
+                <Delete />
+              </IconButton>
             </Box>
             {childData
               .filter((child) => child.parentId === item.id)
@@ -124,6 +134,16 @@ function App() {
                     }}
                     sx={{ m: 1 }}
                   />
+                  <IconButton
+                    onClick={() => {
+                      const newChildData = [...childData];
+                      const childIndex = newChildData.findIndex((c) => c.id === child.id);
+                      newChildData.splice(childIndex, 1);
+                      setChildData(newChildData);
+                    }}
+                  >
+                    <Delete />
+                  </IconButton>
                 </Box>
               ))}
             <Button
