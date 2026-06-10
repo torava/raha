@@ -1,18 +1,41 @@
-import { Box, Button, TextField } from '@mui/material';
+import { Box, Button, MenuItem, Select, TextField } from '@mui/material';
 import type { PieItemId, PieValueType } from '@mui/x-charts';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { useState } from 'react';
 
 function App() {
-  const [data, setData] = useState<PieValueType[]>([]);
-  const [childData, setChildData] = useState<(PieValueType & { parentId?: PieItemId })[]>([]);
+  const [data, setData] = useState<(PieValueType & { period: string })[]>([]);
+  const [childData, setChildData] = useState<(PieValueType & { parentId?: PieItemId; period: string })[]>([]);
+  const [previousPeriod, setPreviousPeriod] = useState('30');
+  const [currentPeriod, setCurrentPeriod] = useState('30');
   const middleRadius = 167;
+  const fittedData = data.map((item) => ({
+    ...item,
+    value: item.value / Number(item.period) * Number(currentPeriod),
+  }));
+  const fittedChildData = childData.map((item) => ({
+    ...item,
+    value: item.value / Number(item.period) * Number(currentPeriod),
+  }));
   return (
     <>
+      <Box sx={{ textAlign: 'center' }}>
+        <Select
+          value={currentPeriod}
+          onChange={(event) => {
+            setCurrentPeriod(event.target.value);
+          }}
+          sx={{ m: 1 }}
+        >
+          <MenuItem value="1">daily</MenuItem>
+          <MenuItem value="30.4167">monthly</MenuItem>
+          <MenuItem value="365">yearly</MenuItem>
+        </Select>
+      </Box>
       <PieChart
         series={[
-          { data, innerRadius: 0, outerRadius: middleRadius, cornerRadius: 3 },
-          { data: childData, innerRadius: middleRadius, outerRadius: middleRadius + 20, cornerRadius: 3 },
+          { data: fittedData, innerRadius: 0, outerRadius: middleRadius, cornerRadius: 3 },
+          { data: fittedChildData, innerRadius: middleRadius, outerRadius: middleRadius + 20, cornerRadius: 3 },
         ]}
         width={375}
         height={375}
@@ -37,6 +60,20 @@ function App() {
                 }}
                 sx={{ m: 1 }}
               />
+              <Select
+                value={item.period}
+                onChange={(event) => {
+                  const newData = [...data];
+                  newData[index] = { ...item, period: event.target.value };
+                  setData(newData);
+                  setPreviousPeriod(event.target.value);
+                }}
+                sx={{ m: 1 }}
+              >
+                <MenuItem value="1">daily</MenuItem>
+                <MenuItem value="30.4167">monthly</MenuItem>
+                <MenuItem value="365">yearly</MenuItem>
+              </Select>
               <TextField
                 label="Value"
                 onChange={(event) => {
@@ -62,6 +99,21 @@ function App() {
                     }}
                     sx={{ m: 1 }}
                   />
+                  <Select
+                    value={child.period}
+                    onChange={(event) => {
+                      const newChildData = [...childData];
+                      const childIndex = newChildData.findIndex((c) => c.id === child.id);
+                      newChildData[childIndex] = { ...child, period: event.target.value };
+                      setChildData(newChildData);
+                      setPreviousPeriod(event.target.value);
+                    }}
+                    sx={{ m: 1 }}
+                  >
+                    <MenuItem value="1">daily</MenuItem>
+                    <MenuItem value="30.4167">monthly</MenuItem>
+                    <MenuItem value="365">yearly</MenuItem>
+                  </Select>
                   <TextField
                     label="Value"
                     onChange={(event) => {
@@ -75,14 +127,19 @@ function App() {
                 </Box>
               ))}
             <Button
-              onClick={() => setChildData([...childData, { parentId: item.id, id: childData.length, value: 0 }])}
+              onClick={() =>
+                setChildData([
+                  ...childData,
+                  { parentId: item.id, id: childData.length, value: 0, period: previousPeriod },
+                ])
+              }
               disableRipple
             >
               Add Child
             </Button>
           </Box>
         ))}
-        <Button onClick={() => setData([...data, { id: data.length, value: 0 }])} disableRipple>
+        <Button onClick={() => setData([...data, { id: data.length, value: 0, period: previousPeriod }])} disableRipple>
           Add
         </Button>
       </Box>
