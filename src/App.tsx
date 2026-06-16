@@ -50,7 +50,7 @@ function App() {
       <Box sx={{ textAlign: 'center' }}>
         {data.map((item, index) => (
           <Box key={index}>
-            <Box sx={{ display: 'flex' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
               <TextField
                 label="Label"
                 value={item.label}
@@ -97,7 +97,7 @@ function App() {
             {childData
               .filter((child) => child.parentId === item.id)
               .map((child) => (
-                <Box sx={{ display: 'flex' }}>
+                <Box key={child.id} sx={{ display: 'flex', justifyContent: 'center' }}>
                   <TextField
                     label="Label"
                     value={child.label}
