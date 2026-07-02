@@ -1,5 +1,4 @@
 import { Autocomplete, createFilterOptions, TextField, type AutocompleteProps } from '@mui/material';
-import { useState } from 'react';
 
 const filter = createFilterOptions();
 
