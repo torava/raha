@@ -96,7 +96,7 @@ function App() {
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
               <CreatableAutocomplete
                 renderInput={(params) => <TextField {...params} label="Label" />}
-                value={item.label}
+                value={item.label || ''}
                 onChange={(_event, newValue) => {
                   const newData = [...data];
                   if (typeof newValue === 'string') {
@@ -157,7 +157,7 @@ function App() {
                 <Box key={child.id} sx={{ display: 'flex', justifyContent: 'center' }}>
                   <CreatableAutocomplete
                     renderInput={(params) => <TextField {...params} label="Label" />}
-                    value={child.label}
+                    value={child.label || ''}
                     onChange={(_event, newValue) => {
                       const newChildData = [...childData];
                       const childIndex = newChildData.findIndex((c) => c.id === child.id);
