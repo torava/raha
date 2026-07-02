@@ -4,6 +4,49 @@ import type { PieItemId, PieValueType } from '@mui/x-charts';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { useState } from 'react';
 
+import CreatableAutocomplete from './CreatableAutocomplete';
+
+const INITIAL_LABELS = {
+  LIVING: [
+    'Mortgage Principal',
+    'Mortgage Interest',
+    'Strata Fee',
+    'Property Tax',
+    'Heat',
+    'Electricity',
+    'Water/Sewer/Garbage',
+    'Rent',
+    'House Insurance',
+    'Clearing',
+    'Repair & Maintenance',
+    'Landscaping',
+    'Renovations/Improvements',
+  ],
+  FOOD: ['Groceries', 'Restaurants', 'Coffee Shops', 'Pet Food'],
+  TRAVEL: [
+    'Vehicle Insurance',
+    'Vehicle Payments',
+    'Vehicle Maintenance',
+    'Fuel/Electricity',
+    'Public Transportation',
+    'Parking',
+  ],
+  ESSENTIALS: ['Household Items', 'Clothing', 'Self Care', 'Medical Care', 'Pet Care', 'Personal Insurance'],
+  HEALTH: [
+    'Medical Care',
+    'Dental',
+    'Vision',
+    'Medical Benefits Plan',
+    'Gym Memberships',
+  ],
+  FAMILY: ['Childcare', 'School Expenses', "Children's Activities"],
+  COMMUNICATION: ['Internet', 'TV', 'Phones'],
+  ENTERTAINMENT: ['Subscriptions', 'Alcohol', 'Tobacco', 'Vacations'],
+  SAVINGS: ['Education Savings', 'Life Insurance', 'Retirement Savings', 'Emergency Fund'],
+  DONATIONS: ['Gifts', 'Charity'],
+  FINANCIAL: ['Bank Fees', 'Loan Interest', 'Tax Preparation'],
+};
+
 function App() {
   const [data, setData] = useState<(PieValueType & { period: string })[]>([]);
   const [childData, setChildData] = useState<(PieValueType & { parentId?: PieItemId; period: string })[]>([]);
@@ -51,15 +94,29 @@ function App() {
         {data.map((item, index) => (
           <Box key={index}>
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-              <TextField
-                label="Label"
+              <CreatableAutocomplete
+                renderInput={(params) => <TextField {...params} label="Label" />}
                 value={item.label}
-                onChange={(event) => {
+                onChange={(_event, newValue) => {
                   const newData = [...data];
-                  newData[index] = { ...item, label: event.target.value };
+                  if (typeof newValue === 'string') {
+                    newData[index] = {
+                      ...item,
+                      label: newValue,
+                    };
+                  } else if (newValue && newValue.inputValue) {
+                    // Create a new value from the user input
+                    newData[index] = {
+                      ...item,
+                      label: newValue.inputValue,
+                    };
+                  } else {
+                    newData[index] = newValue ? { ...item, ...newValue } : { ...item, label: '' };
+                  }
                   setData(newData);
                 }}
-                sx={{ m: 1 }}
+                options={Object.keys(INITIAL_LABELS).map((parent) => ({ label: parent }))}
+                sx={{ m: 1, width: '200px' }}
               />
               <Select
                 value={item.period}
@@ -98,16 +155,32 @@ function App() {
               .filter((child) => child.parentId === item.id)
               .map((child) => (
                 <Box key={child.id} sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <TextField
-                    label="Label"
+                  <CreatableAutocomplete
+                    renderInput={(params) => <TextField {...params} label="Label" />}
                     value={child.label}
-                    onChange={(event) => {
+                    onChange={(_event, newValue) => {
                       const newChildData = [...childData];
                       const childIndex = newChildData.findIndex((c) => c.id === child.id);
-                      newChildData[childIndex] = { ...child, label: event.target.value };
+                      if (typeof newValue === 'string') {
+                        newChildData[childIndex] = {
+                          ...child,
+                          label: newValue,
+                        };
+                      } else if (newValue && newValue.inputValue) {
+                        // Create a new value from the user input
+                        newChildData[childIndex] = {
+                          ...child,
+                          label: newValue.inputValue,
+                        };
+                      } else {
+                        newChildData[childIndex] = newValue ? { ...child, ...newValue} : { ...child, label: '' };
+                      }
                       setChildData(newChildData);
                     }}
-                    sx={{ m: 1 }}
+                    options={INITIAL_LABELS[item.label as keyof typeof INITIAL_LABELS]?.map((child) => ({
+                      label: child,
+                    }))}
+                    sx={{ m: 1, width: '200px' }}
                   />
                   <Select
                     value={child.period}
